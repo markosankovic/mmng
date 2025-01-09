@@ -8,7 +8,12 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        arch: [x64]
+      fail-fast: false # allow other matrix entries to continue even if one fails
 
     steps:
       - name: Export GitHub Actions cache environment variables
