@@ -6,7 +6,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 project(mmng VERSION 0.0.1)
 
 find_package(fmt CONFIG REQUIRED)
+find_package(unofficial-uwebsockets CONFIG REQUIRED)
 
 add_executable(mmng src/main.cpp)
 
-target_link_libraries(mmng PRIVATE fmt::fmt)
+target_link_libraries(mmng PRIVATE fmt::fmt unofficial::uwebsockets::uwebsockets)
