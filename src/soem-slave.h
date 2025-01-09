@@ -22,4 +22,8 @@ public:
     info.state = get_state();
     return info;
   }
+
+  bool set_state(uint16_t target_state) override {
+    return set_ethercat_slave_state(&ecx_context, position_, target_state);
+  }
 };

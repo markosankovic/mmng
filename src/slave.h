@@ -11,6 +11,8 @@ public:
 
   virtual SlaveInfo get_info() = 0;
 
+  virtual bool set_state(uint16_t target_state) = 0;
+
 protected:
   Slave() {}
 };

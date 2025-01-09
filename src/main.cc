@@ -43,6 +43,21 @@ int main() {
              nlohmann::json info = slave_info;
              res->end(info.dump());
            })
+      .get("/slaves/:id/set-state/:state",
+           [&master](auto *res, auto *req) {
+             std::string_view idv = req->getParameter(0);
+             std::string id_str(idv.substr(0, idv.length()));
+             uint32_t id = std::stoi(id_str);
+
+             std::string_view statev = req->getParameter(1);
+             std::string state_str(statev.substr(0, statev.length()));
+             uint32_t state = std::stoi(state_str);
+
+             auto success = master.slaves.at(id)->set_state(state);
+             res->writeHeader("Content-Type", "application/json");
+             nlohmann::json info = {{"success", success}};
+             res->end(info.dump());
+           })
       .listen(9000,
               [](auto *listenSocket) {
                 if (listenSocket) {
