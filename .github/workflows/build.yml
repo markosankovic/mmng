@@ -14,7 +14,4 @@ jobs:
           submodules: true # fetches vcpkg into the root directory and other submodules into the 'extern' directory
           fetch-depth: 0 # to describe a tag during manual dispatches, fetching all history is required
 
-      - name: Set up CMake
-        uses: actions/setup-cmake@v3
-        with:
-          cmake-version: '3.28'  # Replace with the desired version of CMake
+      - uses: lukka/get-cmake@latest
