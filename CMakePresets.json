@@ -7,19 +7,24 @@
   },
   "configurePresets": [
     {
-      "name": "default",
-      "hidden": false,
+      "name": "vcpkg",
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "installDir": "${sourceDir}/out/install/${presetName}",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "vcpkg/scripts/buildsystems/vcpkg.cmake"
+      }
+    },
+    {
+      "name": "release",
+      "inherits": "vcpkg",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
     },
     {
       "name": "debug",
-      "hidden": false,
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build-debug",
+      "inherits": "vcpkg",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       }
@@ -27,16 +32,14 @@
   ],
   "buildPresets": [
     {
-      "name": "default",
+      "name": "release",
       "hidden": false,
-      "configurePreset": "default",
-      "jobs": 4
+      "configurePreset": "release"
     },
     {
       "name": "debug",
       "hidden": false,
-      "configurePreset": "debug",
-      "jobs": 2
+      "configurePreset": "debug"
     }
   ]
 }
