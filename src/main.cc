@@ -19,15 +19,15 @@ int main() {
     }
   }
 
-  uWS::App()
+  uWS::SSLApp({.key_file_name = "mmng.key", .cert_file_name = "mmng.crt"})
       .get("/",
            [](auto *res, auto *req) {
              res->writeHeader("Content-Type", "text/html; charset=utf-8");
              res->end("<h1>Welcome to uWebSockets HTTP Server</h1>");
            })
       .listen(9000,
-              [](auto *token) {
-                if (token) {
+              [](auto *listenSocket) {
+                if (listenSocket) {
                   LOG_F(INFO, "Server is listening on port 9000");
                 } else {
                   LOG_F(INFO, "Failed to start server!");
