@@ -15,6 +15,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 project(mmng VERSION 0.0.1)
 
+find_package(nlohmann_json CONFIG REQUIRED)
+set(nlohmann-json_IMPLICIT_CONVERSIONS OFF)
 find_package(unofficial-uwebsockets CONFIG REQUIRED)
 
 # Include subprojects.
@@ -35,6 +37,7 @@ endif()
 
 set(MOTION_MASTER_LINK_LIBRARIES
   loguru
+  nlohmann_json::nlohmann_json
   soem
   unofficial::uwebsockets::uwebsockets)
 

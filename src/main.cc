@@ -4,6 +4,8 @@
 #include <loguru.h>
 #include <uwebsockets/App.h>
 
+#include <nlohmann/json.hpp>
+
 const char *ifname = "enx1c1adff64fae";
 
 int main() {
@@ -15,6 +17,15 @@ int main() {
            [](auto *res, auto *req) {
              res->writeHeader("Content-Type", "text/html; charset=utf-8");
              res->end("<h1>Welcome to uWebSockets HTTP Server</h1>");
+           })
+      .get("/slaves",
+           [&master](auto *res, auto *req) {
+             nlohmann::json slaves;
+             for (const auto &ptr : master.slaves) {
+               slaves.push_back(ptr->to_json());
+             }
+             res->writeHeader("Content-Type", "application/json");
+             res->end(slaves.dump());
            })
       .listen(9000,
               [](auto *listenSocket) {

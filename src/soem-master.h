@@ -4,6 +4,8 @@
 
 #include <loguru.h>
 
+#include "soem-slave.h"
+
 class SoemMaster : public Master {
 public:
   ~SoemMaster() override { ec_close(); }
@@ -19,10 +21,9 @@ public:
       LOG_F(INFO, "ec_init on %s succeeded.\n", ifname);
       if (ec_config_init(FALSE) > 0) {
         LOG_F(INFO, "%d slaves found and configured.\n", ec_slavecount);
-
-        for (int i = 1; i <= ec_slavecount; i++) {
-          auto slave = ec_slave[i];
-          LOG_F(INFO, "Slave %d: Name: %s", i, slave.name);
+        for (uint8_t i = 1; i <= ec_slavecount; i++) {
+          auto slave = std::make_unique<SoemSlave>(i);
+          slaves.push_back(std::move(slave));
         }
       }
     }
