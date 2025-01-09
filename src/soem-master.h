@@ -6,6 +6,8 @@
 
 class SoemMaster : public Master {
 public:
+  ~SoemMaster() override { ec_close(); }
+
   void init(const char *ifname) override {
     // This prevents ecx_config_map_group from transitioning devices without
     // firmware installed into SAFE-OPERATIONAL state.

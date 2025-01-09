@@ -28,7 +28,5 @@ int main() {
 
   LOG_F(INFO, "uWebSockets HTTP Server Stopped!");
 
-  ec_close();
-
   return 0;
 }
