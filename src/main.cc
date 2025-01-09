@@ -33,6 +33,16 @@ int main() {
              res->writeHeader("Content-Type", "application/json");
              res->end(slaves.dump());
            })
+      .get("/slaves/:id/state",
+           [&master](auto *res, auto *req) {
+             std::string_view idv = req->getParameter(0);
+             std::string id_str(idv.substr(0, idv.length()));
+             std::uint32_t id = std::stoi(id_str);
+             auto slave_state = master.slaves.at(id)->get_state();
+             res->writeHeader("Content-Type", "application/json");
+             nlohmann::json state = slave_state;
+             res->end(state.dump());
+           })
       .listen(9000,
               [](auto *listenSocket) {
                 if (listenSocket) {
