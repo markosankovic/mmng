@@ -1,23 +1,14 @@
 #include "main.h"
 #include "ethercat.h"
+#include "soem-master.h"
 #include <loguru.h>
 #include <uwebsockets/App.h>
 
 const char *ifname = "enx1c1adff64fae";
 
 int main() {
-  // This prevents ecx_config_map_group from transitioning devices without
-  // firmware installed into SAFE-OPERATIONAL state.
-  // SOMANET devices without firmware that are transitioned into this state
-  // become stuck and can only be recovered by power cycling the device.
-  ecx_context.manualstatechange = TRUE;
-
-  if (ec_init(ifname)) {
-    LOG_F(INFO, "ec_init on %s succeeded.\n", ifname);
-    if (ec_config_init(FALSE) > 0) {
-      LOG_F(INFO, "%d slaves found and configured.\n", ec_slavecount);
-    }
-  }
+  SoemMaster master;
+  master.init(ifname);
 
   uWS::SSLApp({.key_file_name = "mmng.key", .cert_file_name = "mmng.crt"})
       .get("/",
@@ -34,7 +25,10 @@ int main() {
                 }
               })
       .run();
+
   LOG_F(INFO, "uWebSockets HTTP Server Stopped!");
+
+  ec_close();
 
   return 0;
 }
