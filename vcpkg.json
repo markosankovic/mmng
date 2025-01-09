@@ -1,6 +1,9 @@
 {
   "dependencies": [
     "nlohmann-json",
-    "uwebsockets"
+    {
+      "name": "uwebsockets",
+      "features": ["ssl", "zlib"]
+    }
   ]
 }

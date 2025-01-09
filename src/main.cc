@@ -8,11 +8,17 @@
 
 const char *ifname = "enx1c1adff64fae";
 
+const char *key_file_name =
+    "/home/marko/github/markosankovic/mmng/certs/mmng.key";
+const char *cert_file_name =
+    "/home/marko/github/markosankovic/mmng/certs/mmng.crt";
+
 int main() {
   SoemMaster master;
   master.init(ifname);
 
-  uWS::SSLApp({.key_file_name = "mmng.key", .cert_file_name = "mmng.crt"})
+  uWS::SSLApp(
+      {.key_file_name = key_file_name, .cert_file_name = cert_file_name})
       .get("/",
            [](auto *res, auto *req) {
              res->writeHeader("Content-Type", "text/html; charset=utf-8");
