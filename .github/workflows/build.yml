@@ -15,3 +15,9 @@ jobs:
           fetch-depth: 0 # to describe a tag during manual dispatches, fetching all history is required
 
       - uses: lukka/get-cmake@latest
+
+      - name: Configure Project
+        run: cmake --preset release
+
+      - name: Build Project
+        run: cmake --build --preset release
