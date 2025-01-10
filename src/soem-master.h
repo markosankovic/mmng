@@ -1,9 +1,8 @@
 #pragma once
 
-#include "master.h"
-
 #include <loguru.h>
 
+#include "master.h"
 #include "soem-slave.h"
 
 class SoemMaster : public Master {
