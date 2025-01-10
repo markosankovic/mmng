@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <nlohmann/json.hpp>
 
+#include "parameter.h"
+
 struct SlaveInfo {
   uint16_t position;
   std::string name;
@@ -21,6 +23,10 @@ public:
 
   virtual int upload(uint16_t index, uint8_t subindex) = 0;
 
+  virtual void loadParameters() = 0;
+
 protected:
   Slave() {}
+
+  std::map<std::pair<uint16_t, uint8_t>, Parameter> parameters;
 };

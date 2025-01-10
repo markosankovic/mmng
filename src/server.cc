@@ -49,6 +49,17 @@ void Server::start() {
              nlohmann::json info = {{"success", success}};
              res->end(info.dump());
            })
+      .get("/slaves/:id/load-parameters",
+           [&](auto *res, auto *req) {
+             std::string_view idv = req->getParameter(0);
+             std::string id_str(idv.substr(0, idv.length()));
+             uint32_t id = std::stoi(id_str);
+
+             master.slaves.at(id)->loadParameters();
+             res->writeHeader("Content-Type", "application/json");
+             nlohmann::json info = {{"success", true}};
+             res->end(info.dump());
+           })
       .get("/slaves/:id/upload/:index/:subindex",
            [&](auto *res, auto *req) {
              std::string_view idv = req->getParameter(0);
