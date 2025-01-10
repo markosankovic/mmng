@@ -76,12 +76,12 @@ void Server::start() {
                res->writeStatus("404")->end();
              }
            })
-      .get("/slaves/:id/get-state",
+      .get("/slaves/:id/state",
            [&](auto *res, auto *req) {
              auto id = getParameter<int>(req, 0);
              try {
                auto state = master.slaves.at(id)->get_state();
-               nlohmann::json stateJson = {{"state", state}};
+               nlohmann::json stateJson = state;
                writeHeaders(res);
                res->end(stateJson.dump());
              } catch (const std::out_of_range &e) {
@@ -89,7 +89,7 @@ void Server::start() {
                res->writeStatus("404")->end();
              }
            })
-      .get("/slaves/:id/set-state/:state",
+      .get("/slaves/:id/state/:state",
            [&](auto *res, auto *req) {
              auto id = getParameter<int>(req, 0);
              auto state = getParameter<int>(req, 1);
