@@ -18,7 +18,6 @@ const char *crtFileName =
 
 int main() {
   SoemMaster master;
-  master.init(ifname);
 
   Server server(master, keyFileName, crtFileName);
   std::thread serverThread([&server]() { server.start(); });

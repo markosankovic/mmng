@@ -13,6 +13,8 @@ public:
 
   virtual void init(const char *ifname) = 0;
 
+  virtual void deinit() = 0;
+
 protected:
   Master() {}
 };

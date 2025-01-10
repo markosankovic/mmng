@@ -7,7 +7,7 @@
 
 class SoemMaster : public Master {
 public:
-  ~SoemMaster() override { ec_close(); }
+  ~SoemMaster() override { deinit(); }
 
   void init(const char *ifname) override {
     // This prevents ecx_config_map_group from transitioning devices without
@@ -24,7 +24,14 @@ public:
           auto slave = std::make_unique<SoemSlave>(i);
           slaves.push_back(std::move(slave));
         }
+        LOG_F(INFO, "EtherCAT master has been initialized.");
       }
     }
   };
+
+  void deinit() override {
+    slaves.clear();
+    ec_close();
+    LOG_F(INFO, "EtherCAT master has been deinitialized.");
+  }
 };

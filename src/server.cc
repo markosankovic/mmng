@@ -15,12 +15,40 @@ void Server::start() {
              res->end(
                  "<h1>Welcome to Motion Master: The Next Generation </h1>");
            })
+      .get("/master/init",
+           [&](auto *res, auto *req) {
+             const char *ifname = "enx1c1adff64fae";
+             master.init(ifname);
+             res->writeHeader("Access-Control-Allow-Origin", "*");
+             res->writeHeader("Access-Control-Allow-Methods",
+                              "GET, POST, PUT, DELETE, OPTIONS");
+             res->writeHeader("Access-Control-Allow-Headers",
+                              "Content-Type, Authorization");
+             res->writeHeader("Content-Type", "application/json");
+             res->end("{}");
+           })
+      .get("/master/deinit",
+           [&](auto *res, auto *req) {
+             master.deinit();
+             res->writeHeader("Access-Control-Allow-Origin", "*");
+             res->writeHeader("Access-Control-Allow-Methods",
+                              "GET, POST, PUT, DELETE, OPTIONS");
+             res->writeHeader("Access-Control-Allow-Headers",
+                              "Content-Type, Authorization");
+             res->writeHeader("Content-Type", "application/json");
+             res->end("{}");
+           })
       .get("/slaves",
            [&](auto *res, auto *req) {
              nlohmann::json slaves;
              for (const auto &ptr : master.slaves) {
                slaves.push_back(ptr->get_info());
              }
+             res->writeHeader("Access-Control-Allow-Origin", "*");
+             res->writeHeader("Access-Control-Allow-Methods",
+                              "GET, POST, PUT, DELETE, OPTIONS");
+             res->writeHeader("Access-Control-Allow-Headers",
+                              "Content-Type, Authorization");
              res->writeHeader("Content-Type", "application/json");
              res->end(slaves.dump());
            })
@@ -82,7 +110,7 @@ void Server::start() {
       .listen(9000,
               [](auto *listenSocket) {
                 if (listenSocket) {
-                  LOG_F(INFO, "Server is listening on port 9000");
+                  LOG_F(INFO, "Server is listening on port 9000.");
                 } else {
                   LOG_F(INFO, "Failed to start server!");
                 }

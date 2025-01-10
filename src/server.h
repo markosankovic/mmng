@@ -1,7 +1,9 @@
+#pragma once
+
 #include "master.h"
 
 class Server {
-  const Master &master;
+  Master &master;
   const char *keyFileName;
   const char *crtFileName;
 
