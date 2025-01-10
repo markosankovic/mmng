@@ -102,6 +102,22 @@ void Server::start() {
                res->writeStatus("404")->end();
              }
            })
+      .get("/slaves/:id/parameters",
+           [&](auto *res, auto *req) {
+             auto id = getParameter<int>(req, 0);
+             try {
+               const auto &parameters = master.slaves.at(id)->parameters;
+               nlohmann::json parametersJson = parameters;
+               writeHeaders(res);
+               res->end(parametersJson.dump());
+             } catch (const std::out_of_range &e) {
+               LOG_F(INFO, "Slave with id %d not found.", id);
+               res->writeStatus("404")->end();
+             } catch (const std::runtime_error &e) {
+               LOG_F(ERROR, "Error loading parameters: %s", e.what());
+               res->writeStatus("500")->end();
+             }
+           })
       .get("/slaves/:id/load-parameters",
            [&](auto *res, auto *req) {
              auto id = getParameter<int>(req, 0);
@@ -113,7 +129,7 @@ void Server::start() {
                LOG_F(INFO, "Slave with id %d not found.", id);
                res->writeStatus("404")->end();
              } catch (const std::runtime_error &e) {
-               LOG_F(ERROR, "Failed to load parameters: %s", e.what());
+               LOG_F(ERROR, "Error loading parameters: %s", e.what());
                res->writeStatus("500")->end();
              }
            })

@@ -15,6 +15,8 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SlaveInfo, position, name, state)
 
 class Slave {
 public:
+  std::map<std::pair<uint16_t, uint8_t>, Parameter> parameters;
+
   virtual uint16_t get_state() = 0;
 
   virtual SlaveInfo get_info() = 0;
@@ -29,6 +31,4 @@ public:
 
 protected:
   Slave() {}
-
-  std::map<std::pair<uint16_t, uint8_t>, Parameter> parameters;
 };
