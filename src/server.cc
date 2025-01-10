@@ -73,6 +73,16 @@ void Server::start() {
              writeHeaders(res);
              res->end(info.dump());
            })
+      .get("/slaves/:id/get-state",
+           [&](auto *res, auto *req) {
+             auto id = getParameter<int>(req, 0);
+
+             auto state = master.slaves.at(id)->get_state();
+             nlohmann::json stateJson = {{"state", state}};
+
+             writeHeaders(res);
+             res->end(stateJson.dump());
+           })
       .get("/slaves/:id/set-state/:state",
            [&](auto *res, auto *req) {
              auto id = getParameter<int>(req, 0);
