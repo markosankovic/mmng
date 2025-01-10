@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <nlohmann/json.hpp>
+#include <vector>
 
 #include "parameter.h"
 
@@ -15,7 +16,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SlaveInfo, position, name, state)
 
 class Slave {
 public:
-  std::map<std::pair<uint16_t, uint8_t>, Parameter> parameters;
+  std::map<std::pair<uint16_t, uint8_t>, Parameter> parametersMap;
 
   virtual uint16_t get_state() = 0;
 
@@ -28,6 +29,8 @@ public:
   virtual void loadParameters() = 0;
 
   virtual void clearParameters() = 0;
+
+  virtual std::vector<Parameter> getParameters() = 0;
 
 protected:
   Slave() {}

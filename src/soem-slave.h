@@ -33,7 +33,7 @@ public:
   void loadParameters() override {
     std::lock_guard<std::mutex> lock(mailboxMutex);
 
-    if (parameters.size() > 0) {
+    if (parametersMap.size() > 0) {
       throw std::runtime_error("Parameters already loaded!");
     }
 
@@ -86,8 +86,8 @@ public:
       }
 
       for (uint8_t j = 0; j <= od_list.MaxSub[i]; j++) {
-        auto [iterator, success] =
-            parameters.try_emplace(std::pair{od_list.Index[i], j}, Parameter{});
+        auto [iterator, success] = parametersMap.try_emplace(
+            std::pair{od_list.Index[i], j}, Parameter{});
 
         if (success) {
           auto &parameter = iterator->second;
@@ -107,12 +107,20 @@ public:
     }
 
     LOG_F(INFO, "Device %d: Configured %lu object dictionary entries.",
-          position, parameters.size());
+          position, parametersMap.size());
 
     return;
   }
 
-  void clearParameters() override { parameters.clear(); }
+  void clearParameters() override { parametersMap.clear(); }
+
+  std::vector<Parameter> getParameters() override {
+    std::vector<Parameter> parameters;
+    for (const auto &[key, value] : parametersMap) {
+      parameters.push_back(value);
+    }
+    return parameters;
+  }
 
   int upload(uint16_t index, uint8_t subindex) override { return 123; }
 };

@@ -106,7 +106,7 @@ void Server::start() {
            [&](auto *res, auto *req) {
              auto id = getParameter<int>(req, 0);
              try {
-               const auto &parameters = master.slaves.at(id)->parameters;
+               const auto &parameters = master.slaves.at(id)->getParameters();
                nlohmann::json parametersJson = parameters;
                writeHeaders(res);
                res->end(parametersJson.dump());
