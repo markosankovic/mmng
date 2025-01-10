@@ -23,11 +23,11 @@ int main() {
   Server server(master, keyFileName, crtFileName);
   std::thread serverThread([&server]() { server.start(); });
 
-  LOG_F(INFO, "uWebSockets HTTP Server is running in a separate thread.");
+  LOG_F(INFO, "Server is running in a separate thread.");
 
   serverThread.join();
 
-  LOG_F(INFO, "uWebSockets HTTP Server Stopped!");
+  LOG_F(INFO, "Server has stopped!");
 
   return 0;
 }

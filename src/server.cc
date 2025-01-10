@@ -12,7 +12,8 @@ void Server::start() {
       .get("/",
            [](auto *res, auto *req) {
              res->writeHeader("Content-Type", "text/html; charset=utf-8");
-             res->end("<h1>Welcome to uWebSockets HTTP Server</h1>");
+             res->end(
+                 "<h1>Welcome to Motion Master: The Next Generation </h1>");
            })
       .get("/slaves",
            [&](auto *res, auto *req) {
