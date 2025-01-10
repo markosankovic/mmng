@@ -44,14 +44,12 @@ void Server::start() {
            [&](auto *res, auto *req) {
              const char *ifname = "enx1c1adff64fae";
              master.init(ifname);
-
              writeHeaders(res);
              res->end();
            })
       .get("/master/deinit",
            [&](auto *res, auto *req) {
              master.deinit();
-
              writeHeaders(res);
              res->end();
            })
@@ -61,58 +59,73 @@ void Server::start() {
              for (const auto &ptr : master.slaves) {
                slaves.push_back(ptr->get_info());
              }
-
              writeHeaders(res);
              res->end(slaves.dump());
            })
       .get("/slaves/:id",
            [&](auto *res, auto *req) {
              auto id = getParameter<int>(req, 0);
-             nlohmann::json info = master.slaves.at(id)->get_info();
-
-             writeHeaders(res);
-             res->end(info.dump());
+             try {
+               nlohmann::json info = master.slaves.at(id)->get_info();
+               writeHeaders(res);
+               res->end(info.dump());
+             } catch (const std::out_of_range &e) {
+               LOG_F(INFO, "Slave with id %d not found.", id);
+               res->writeStatus("404")->end();
+             }
            })
       .get("/slaves/:id/get-state",
            [&](auto *res, auto *req) {
              auto id = getParameter<int>(req, 0);
-
-             auto state = master.slaves.at(id)->get_state();
-             nlohmann::json stateJson = {{"state", state}};
-
-             writeHeaders(res);
-             res->end(stateJson.dump());
+             try {
+               auto state = master.slaves.at(id)->get_state();
+               nlohmann::json stateJson = {{"state", state}};
+               writeHeaders(res);
+               res->end(stateJson.dump());
+             } catch (const std::out_of_range &e) {
+               LOG_F(INFO, "Slave with id %d not found.", id);
+               res->writeStatus("404")->end();
+             }
            })
       .get("/slaves/:id/set-state/:state",
            [&](auto *res, auto *req) {
              auto id = getParameter<int>(req, 0);
              auto state = getParameter<int>(req, 1);
-
-             master.slaves.at(id)->set_state(state);
-
-             writeHeaders(res);
-             res->end();
+             try {
+               master.slaves.at(id)->set_state(state);
+               writeHeaders(res);
+               res->end();
+             } catch (const std::out_of_range &e) {
+               LOG_F(INFO, "Slave with id %d not found.", id);
+               res->writeStatus("404")->end();
+             }
            })
       .get("/slaves/:id/load-parameters",
            [&](auto *res, auto *req) {
              auto id = getParameter<int>(req, 0);
-
-             master.slaves.at(id)->loadParameters();
-
-             writeHeaders(res);
-             res->end();
+             try {
+               master.slaves.at(id)->loadParameters();
+               writeHeaders(res);
+               res->end();
+             } catch (const std::out_of_range &e) {
+               LOG_F(INFO, "Slave with id %d not found.", id);
+               res->writeStatus("404")->end();
+             }
            })
       .get("/slaves/:id/upload/:index/:subindex",
            [&](auto *res, auto *req) {
              auto id = getParameter<int>(req, 0);
              auto index = getParameter<int>(req, 1);
              auto subindex = getParameter<int>(req, 2);
-
-             auto value = master.slaves.at(id)->upload(index, subindex);
-             nlohmann::json valueJson = {{"success", value}};
-
-             writeHeaders(res);
-             res->end(valueJson.dump());
+             try {
+               auto value = master.slaves.at(id)->upload(index, subindex);
+               nlohmann::json valueJson = {{"success", value}};
+               writeHeaders(res);
+               res->end(valueJson.dump());
+             } catch (const std::out_of_range &e) {
+               LOG_F(INFO, "Slave with id %d not found.", id);
+               res->writeStatus("404")->end();
+             }
            })
       .listen(9000,
               [](auto *listenSocket) {
