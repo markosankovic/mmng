@@ -49,6 +49,25 @@ void Server::start() {
              nlohmann::json info = {{"success", success}};
              res->end(info.dump());
            })
+      .get("/slaves/:id/upload/:index/:subindex",
+           [&](auto *res, auto *req) {
+             std::string_view idv = req->getParameter(0);
+             std::string id_str(idv.substr(0, idv.length()));
+             uint32_t id = std::stoi(id_str);
+
+             std::string_view indexv = req->getParameter(1);
+             std::string index_str(indexv.substr(0, indexv.length()));
+             uint32_t index = std::stoi(index_str);
+
+             std::string_view subindexv = req->getParameter(2);
+             std::string subindex_str(subindexv.substr(0, subindexv.length()));
+             uint32_t subindex = std::stoi(subindex_str);
+
+             auto value = master.slaves.at(id)->upload(index, subindex);
+             res->writeHeader("Content-Type", "application/json");
+             nlohmann::json valueJson = {{"success", value}};
+             res->end(valueJson.dump());
+           })
       .listen(9000,
               [](auto *listenSocket) {
                 if (listenSocket) {

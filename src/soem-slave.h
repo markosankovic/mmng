@@ -26,4 +26,6 @@ public:
   bool set_state(uint16_t target_state) override {
     return set_ethercat_slave_state(&ecx_context, position_, target_state);
   }
+
+  int upload(uint16_t index, uint8_t subindex) override { return 123; }
 };
