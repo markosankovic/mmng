@@ -2,6 +2,7 @@
 #include "ethercat.h"
 #include <loguru.h>
 #include <nlohmann/json.hpp>
+#include <thread>
 #include <uwebsockets/App.h>
 
 #include "main.h"
@@ -20,7 +21,11 @@ int main() {
   master.init(ifname);
 
   Server server(master, keyFileName, crtFileName);
-  server.start();
+  std::thread serverThread([&server]() { server.start(); });
+
+  LOG_F(INFO, "uWebSockets HTTP Server is running in a separate thread.");
+
+  serverThread.join();
 
   LOG_F(INFO, "uWebSockets HTTP Server Stopped!");
 
