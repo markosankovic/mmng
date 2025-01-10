@@ -14,5 +14,7 @@ public:
 
   void start();
 
-  void configureCors(uWS::HttpResponse<true> *res);
+  template <typename T> T getParameter(uWS::HttpRequest *req, int index);
+
+  void writeHeaders(uWS::HttpResponse<true> *res);
 };

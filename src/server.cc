@@ -7,12 +7,29 @@
 Server::Server(Master &master, const char *keyFileName, const char *crtFileName)
     : master(master), keyFileName(keyFileName), crtFileName(crtFileName) {}
 
-void Server::configureCors(uWS::HttpResponse<true> *res) {
+void Server::writeHeaders(uWS::HttpResponse<true> *res) {
   res->writeHeader("Access-Control-Allow-Origin", "*");
   res->writeHeader("Access-Control-Allow-Methods",
                    "GET, POST, PUT, DELETE, OPTIONS");
   res->writeHeader("Access-Control-Allow-Headers",
                    "Content-Type, Authorization");
+  res->writeHeader("Content-Type", "application/json");
+}
+
+template <typename T> T Server::getParameter(uWS::HttpRequest *req, int index) {
+  std::string_view idv = req->getParameter(index);
+  std::string p(idv.substr(0, idv.length()));
+
+  if constexpr (std::is_same<T, int>::value) {
+    return std::stoi(p);
+  } else if constexpr (std::is_same<T, float>::value) {
+    return std::stof(p);
+  } else if constexpr (std::is_same<T, double>::value) {
+    return std::stod(p);
+  } else {
+    static_assert(
+        false, "Unsupported type"); // Compile-time error for unsupported types
+  }
 }
 
 void Server::start() {
@@ -28,88 +45,63 @@ void Server::start() {
              const char *ifname = "enx1c1adff64fae";
              master.init(ifname);
 
-             configureCors(res);
-             res->writeHeader("Content-Type", "application/json");
+             writeHeaders(res);
              res->end();
            })
       .get("/master/deinit",
            [&](auto *res, auto *req) {
              master.deinit();
 
-             configureCors(res);
-             res->writeHeader("Content-Type", "application/json");
+             writeHeaders(res);
              res->end();
            })
       .get("/slaves",
            [&](auto *res, auto *req) {
-             nlohmann::json slaves;
+             nlohmann::json slaves = nlohmann::json::array();
              for (const auto &ptr : master.slaves) {
                slaves.push_back(ptr->get_info());
              }
 
-             configureCors(res);
-             res->writeHeader("Content-Type", "application/json");
+             writeHeaders(res);
              res->end(slaves.dump());
            })
       .get("/slaves/:id",
            [&](auto *res, auto *req) {
-             std::string_view idv = req->getParameter(0);
-             std::string id_str(idv.substr(0, idv.length()));
-             uint32_t id = std::stoi(id_str);
-             auto slave_info = master.slaves.at(id)->get_info();
-             nlohmann::json info = slave_info;
+             auto id = getParameter<int>(req, 0);
+             nlohmann::json info = master.slaves.at(id)->get_info();
 
-             configureCors(res);
-             res->writeHeader("Content-Type", "application/json");
+             writeHeaders(res);
              res->end(info.dump());
            })
       .get("/slaves/:id/set-state/:state",
            [&](auto *res, auto *req) {
-             std::string_view idv = req->getParameter(0);
-             std::string id_str(idv.substr(0, idv.length()));
-             uint32_t id = std::stoi(id_str);
+             auto id = getParameter<int>(req, 0);
+             auto state = getParameter<int>(req, 1);
 
-             std::string_view statev = req->getParameter(1);
-             std::string state_str(statev.substr(0, statev.length()));
-             uint32_t state = std::stoi(state_str);
+             master.slaves.at(id)->set_state(state);
 
-             auto success = master.slaves.at(id)->set_state(state);
-
-             configureCors(res);
-             res->writeHeader("Content-Type", "application/json");
+             writeHeaders(res);
              res->end();
            })
       .get("/slaves/:id/load-parameters",
            [&](auto *res, auto *req) {
-             std::string_view idv = req->getParameter(0);
-             std::string id_str(idv.substr(0, idv.length()));
-             uint32_t id = std::stoi(id_str);
+             auto id = getParameter<int>(req, 0);
 
              master.slaves.at(id)->loadParameters();
 
-             configureCors(res);
-             res->writeHeader("Content-Type", "application/json");
+             writeHeaders(res);
              res->end();
            })
       .get("/slaves/:id/upload/:index/:subindex",
            [&](auto *res, auto *req) {
-             std::string_view idv = req->getParameter(0);
-             std::string id_str(idv.substr(0, idv.length()));
-             uint32_t id = std::stoi(id_str);
-
-             std::string_view indexv = req->getParameter(1);
-             std::string index_str(indexv.substr(0, indexv.length()));
-             uint32_t index = std::stoi(index_str);
-
-             std::string_view subindexv = req->getParameter(2);
-             std::string subindex_str(subindexv.substr(0, subindexv.length()));
-             uint32_t subindex = std::stoi(subindex_str);
+             auto id = getParameter<int>(req, 0);
+             auto index = getParameter<int>(req, 1);
+             auto subindex = getParameter<int>(req, 2);
 
              auto value = master.slaves.at(id)->upload(index, subindex);
              nlohmann::json valueJson = {{"success", value}};
 
-             configureCors(res);
-             res->writeHeader("Content-Type", "application/json");
+             writeHeaders(res);
              res->end(valueJson.dump());
            })
       .listen(9000,
