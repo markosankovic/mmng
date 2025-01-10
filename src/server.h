@@ -1,5 +1,7 @@
 #pragma once
 
+#include <uwebsockets/App.h>
+
 #include "master.h"
 
 class Server {
@@ -11,4 +13,6 @@ public:
   Server(Master &master, const char *keyFileName, const char *crtFileName);
 
   void start();
+
+  void configureCors(uWS::HttpResponse<true> *res);
 };

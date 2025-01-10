@@ -7,6 +7,14 @@
 Server::Server(Master &master, const char *keyFileName, const char *crtFileName)
     : master(master), keyFileName(keyFileName), crtFileName(crtFileName) {}
 
+void Server::configureCors(uWS::HttpResponse<true> *res) {
+  res->writeHeader("Access-Control-Allow-Origin", "*");
+  res->writeHeader("Access-Control-Allow-Methods",
+                   "GET, POST, PUT, DELETE, OPTIONS");
+  res->writeHeader("Access-Control-Allow-Headers",
+                   "Content-Type, Authorization");
+}
+
 void Server::start() {
   uWS::SSLApp({.key_file_name = keyFileName, .cert_file_name = crtFileName})
       .get("/",
@@ -19,24 +27,18 @@ void Server::start() {
            [&](auto *res, auto *req) {
              const char *ifname = "enx1c1adff64fae";
              master.init(ifname);
-             res->writeHeader("Access-Control-Allow-Origin", "*");
-             res->writeHeader("Access-Control-Allow-Methods",
-                              "GET, POST, PUT, DELETE, OPTIONS");
-             res->writeHeader("Access-Control-Allow-Headers",
-                              "Content-Type, Authorization");
+
+             configureCors(res);
              res->writeHeader("Content-Type", "application/json");
-             res->end("{}");
+             res->end();
            })
       .get("/master/deinit",
            [&](auto *res, auto *req) {
              master.deinit();
-             res->writeHeader("Access-Control-Allow-Origin", "*");
-             res->writeHeader("Access-Control-Allow-Methods",
-                              "GET, POST, PUT, DELETE, OPTIONS");
-             res->writeHeader("Access-Control-Allow-Headers",
-                              "Content-Type, Authorization");
+
+             configureCors(res);
              res->writeHeader("Content-Type", "application/json");
-             res->end("{}");
+             res->end();
            })
       .get("/slaves",
            [&](auto *res, auto *req) {
@@ -44,11 +46,8 @@ void Server::start() {
              for (const auto &ptr : master.slaves) {
                slaves.push_back(ptr->get_info());
              }
-             res->writeHeader("Access-Control-Allow-Origin", "*");
-             res->writeHeader("Access-Control-Allow-Methods",
-                              "GET, POST, PUT, DELETE, OPTIONS");
-             res->writeHeader("Access-Control-Allow-Headers",
-                              "Content-Type, Authorization");
+
+             configureCors(res);
              res->writeHeader("Content-Type", "application/json");
              res->end(slaves.dump());
            })
@@ -58,8 +57,10 @@ void Server::start() {
              std::string id_str(idv.substr(0, idv.length()));
              uint32_t id = std::stoi(id_str);
              auto slave_info = master.slaves.at(id)->get_info();
-             res->writeHeader("Content-Type", "application/json");
              nlohmann::json info = slave_info;
+
+             configureCors(res);
+             res->writeHeader("Content-Type", "application/json");
              res->end(info.dump());
            })
       .get("/slaves/:id/set-state/:state",
@@ -73,9 +74,10 @@ void Server::start() {
              uint32_t state = std::stoi(state_str);
 
              auto success = master.slaves.at(id)->set_state(state);
+
+             configureCors(res);
              res->writeHeader("Content-Type", "application/json");
-             nlohmann::json info = {{"success", success}};
-             res->end(info.dump());
+             res->end();
            })
       .get("/slaves/:id/load-parameters",
            [&](auto *res, auto *req) {
@@ -84,9 +86,10 @@ void Server::start() {
              uint32_t id = std::stoi(id_str);
 
              master.slaves.at(id)->loadParameters();
+
+             configureCors(res);
              res->writeHeader("Content-Type", "application/json");
-             nlohmann::json info = {{"success", true}};
-             res->end(info.dump());
+             res->end();
            })
       .get("/slaves/:id/upload/:index/:subindex",
            [&](auto *res, auto *req) {
@@ -103,8 +106,10 @@ void Server::start() {
              uint32_t subindex = std::stoi(subindex_str);
 
              auto value = master.slaves.at(id)->upload(index, subindex);
-             res->writeHeader("Content-Type", "application/json");
              nlohmann::json valueJson = {{"success", value}};
+
+             configureCors(res);
+             res->writeHeader("Content-Type", "application/json");
              res->end(valueJson.dump());
            })
       .listen(9000,
