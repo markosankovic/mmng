@@ -28,19 +28,24 @@ public:
   }
 
   void loadParameters() override {
+    if (parameters.size() > 0) {
+      throw std::runtime_error("Parameters already loaded!");
+    }
+
     ec_ODlistt od_list;
     memset(&od_list, 0, sizeof(od_list));
 
     int error = ecx_readODlist(&ecx_context, position, &od_list);
     if (error <= 0) {
-      LOG_F(ERROR, "Device %d: Failed to read the object dictionary list!",
-            position);
-      throw std::runtime_error(
-          "Failed to read the object dictionary list using ecx_readODlist!");
+      throw std::runtime_error("Error reading the object dictionary list using "
+                               "ecx_readODlist! Error code: " +
+                               std::to_string(error));
     }
 
     return;
   }
+
+  void clearParameters() override { parameters.clear(); }
 
   int upload(uint16_t index, uint8_t subindex) override { return 123; }
 };

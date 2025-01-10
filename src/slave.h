@@ -25,6 +25,8 @@ public:
 
   virtual void loadParameters() = 0;
 
+  virtual void clearParameters() = 0;
+
 protected:
   Slave() {}
 

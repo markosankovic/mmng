@@ -17,9 +17,9 @@ public:
     ecx_context.manualstatechange = TRUE;
 
     if (ec_init(ifname)) {
-      LOG_F(INFO, "ec_init on %s succeeded.\n", ifname);
+      LOG_F(INFO, "ec_init on %s succeeded.", ifname);
       if (ec_config_init(FALSE) > 0) {
-        LOG_F(INFO, "%d slaves found and configured.\n", ec_slavecount);
+        LOG_F(INFO, "%d slaves found and configured.", ec_slavecount);
         for (uint8_t i = 1; i <= ec_slavecount; i++) {
           auto slave = std::make_unique<SoemSlave>(i);
           slaves.push_back(std::move(slave));
