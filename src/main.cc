@@ -9,8 +9,6 @@
 #include "server.h"
 #include "soem-master.h"
 
-const char *ifname = "enx1c1adff64fae";
-
 const char *keyFileName =
     "/home/marko/github/markosankovic/mmng/certs/mmng.key";
 const char *crtFileName =

@@ -17,15 +17,17 @@ void Server::writeHeaders(uWS::HttpResponse<true> *res) {
 }
 
 template <typename T> T Server::getParameter(uWS::HttpRequest *req, int index) {
-  std::string_view idv = req->getParameter(index);
-  std::string p(idv.substr(0, idv.length()));
+  std::string_view psv = req->getParameter(index);
+  std::string str(psv.substr(0, psv.length()));
 
   if constexpr (std::is_same<T, int>::value) {
-    return std::stoi(p);
+    return std::stoi(str);
   } else if constexpr (std::is_same<T, float>::value) {
-    return std::stof(p);
+    return std::stof(str);
   } else if constexpr (std::is_same<T, double>::value) {
-    return std::stod(p);
+    return std::stod(str);
+  } else if constexpr (std::is_same<T, const char *>::value) {
+    return str.c_str();
   } else {
     static_assert(
         false, "Unsupported type"); // Compile-time error for unsupported types
@@ -40,9 +42,9 @@ void Server::start() {
              res->end(
                  "<h1>Welcome to Motion Master: The Next Generation </h1>");
            })
-      .get("/master/init",
+      .get("/master/init/:ifname",
            [&](auto *res, auto *req) {
-             const char *ifname = "enx1c1adff64fae";
+             auto ifname = getParameter<const char *>(req, 0);
              master.init(ifname);
              writeHeaders(res);
              res->end();
