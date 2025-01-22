@@ -9,8 +9,8 @@
 #include "server.h"
 #include "soem-master.h"
 
-const char *keyFileName = "./certs/mmng.key";
-const char *crtFileName = "./certs/mmng.crt";
+const char *keyFileName = "./certs/mmng.local.key";
+const char *crtFileName = "./certs/mmng.local.crt";
 
 int main() {
   SoemMaster master;
