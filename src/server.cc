@@ -67,9 +67,9 @@ void Server::start() {
       .get("/slaves/:id",
            [&](auto *res, auto *req) {
              auto id = getParameter<int>(req, 0);
+             writeHeaders(res);
              try {
                nlohmann::json info = master.slaves.at(id)->get_info();
-               writeHeaders(res);
                res->end(info.dump());
              } catch (const std::out_of_range &e) {
                LOG_F(INFO, "Slave with id %d not found.", id);
@@ -79,10 +79,10 @@ void Server::start() {
       .get("/slaves/:id/state",
            [&](auto *res, auto *req) {
              auto id = getParameter<int>(req, 0);
+             writeHeaders(res);
              try {
                auto state = master.slaves.at(id)->get_state();
                nlohmann::json stateJson = state;
-               writeHeaders(res);
                res->end(stateJson.dump());
              } catch (const std::out_of_range &e) {
                LOG_F(INFO, "Slave with id %d not found.", id);
@@ -93,9 +93,9 @@ void Server::start() {
            [&](auto *res, auto *req) {
              auto id = getParameter<int>(req, 0);
              auto state = getParameter<int>(req, 1);
+             writeHeaders(res);
              try {
                master.slaves.at(id)->set_state(state);
-               writeHeaders(res);
                res->end();
              } catch (const std::out_of_range &e) {
                LOG_F(INFO, "Slave with id %d not found.", id);
@@ -105,10 +105,10 @@ void Server::start() {
       .get("/slaves/:id/parameters",
            [&](auto *res, auto *req) {
              auto id = getParameter<int>(req, 0);
+             writeHeaders(res);
              try {
                const auto &parameters = master.slaves.at(id)->getParameters();
                nlohmann::json parametersJson = parameters;
-               writeHeaders(res);
                res->end(parametersJson.dump());
              } catch (const std::out_of_range &e) {
                LOG_F(INFO, "Slave with id %d not found.", id);
@@ -121,9 +121,9 @@ void Server::start() {
       .get("/slaves/:id/load-parameters",
            [&](auto *res, auto *req) {
              auto id = getParameter<int>(req, 0);
+             writeHeaders(res);
              try {
                master.slaves.at(id)->loadParameters();
-               writeHeaders(res);
                res->end();
              } catch (const std::out_of_range &e) {
                LOG_F(INFO, "Slave with id %d not found.", id);
@@ -136,9 +136,9 @@ void Server::start() {
       .get("/slaves/:id/clear-parameters",
            [&](auto *res, auto *req) {
              auto id = getParameter<int>(req, 0);
+             writeHeaders(res);
              try {
                master.slaves.at(id)->clearParameters();
-               writeHeaders(res);
                res->end();
              } catch (const std::out_of_range &e) {
                LOG_F(INFO, "Slave with id %d not found.", id);
@@ -150,10 +150,10 @@ void Server::start() {
              auto id = getParameter<int>(req, 0);
              auto index = getParameter<int>(req, 1);
              auto subindex = getParameter<int>(req, 2);
+             writeHeaders(res);
              try {
                auto value = master.slaves.at(id)->upload(index, subindex);
                nlohmann::json valueJson = {{"success", value}};
-               writeHeaders(res);
                res->end(valueJson.dump());
              } catch (const std::out_of_range &e) {
                LOG_F(INFO, "Slave with id %d not found.", id);
