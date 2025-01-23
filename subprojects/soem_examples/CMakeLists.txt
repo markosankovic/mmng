@@ -1,0 +1,5 @@
+add_executable(soem_examples_reach_op reach_op.cc)
+target_link_libraries(soem_examples_reach_op soem_utils)
+
+add_executable(soem_examples_reach_preop reach_preop.cc)
+target_link_libraries(soem_examples_reach_preop soem_utils)

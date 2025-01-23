@@ -20,8 +20,10 @@ set(nlohmann-json_IMPLICIT_CONVERSIONS OFF)
 find_package(unofficial-uwebsockets CONFIG REQUIRED)
 
 # Include subprojects.
-add_subdirectory("extern/SOEM")
+add_subdirectory(${CMAKE_SOURCE_DIR}/extern/SOEM ${CMAKE_BINARY_DIR}/extern/SOEM)
 add_subdirectory("subprojects/loguru")
+add_subdirectory("subprojects/soem_examples")
+add_subdirectory("subprojects/soem_utils")
 
 if(WIN32)
   list(APPEND MOTION_MASTER_INCLUDE_DIRECTORIES
@@ -39,6 +41,7 @@ set(MOTION_MASTER_LINK_LIBRARIES
   loguru
   nlohmann_json::nlohmann_json
   soem
+  soem_utils
   unofficial::uwebsockets::uwebsockets)
 
 # Winmm is required for Windows Multimedia Timers. The timer_delete function in
