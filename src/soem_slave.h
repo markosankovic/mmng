@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <mutex>
 
-#include "soem.h"
+#include "soem_utils.h"
 
 class SoemSlave : public Slave {
 

@@ -7,7 +7,7 @@
 
 #include "main.h"
 #include "server.h"
-#include "soem-master.h"
+#include "soem_master.h"
 
 const char *keyFileName = "./certs/mmng.local.key";
 const char *crtFileName = "./certs/mmng.local.crt";

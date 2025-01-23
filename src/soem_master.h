@@ -3,7 +3,7 @@
 #include <loguru.h>
 
 #include "master.h"
-#include "soem-slave.h"
+#include "soem_slave.h"
 
 class SoemMaster : public Master {
 public:
