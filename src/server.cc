@@ -153,7 +153,8 @@ void Server::start() {
              writeHeaders(res);
              try {
                auto value = master.slaves.at(id)->upload(index, subindex);
-               nlohmann::json valueJson = {{"success", value}};
+               auto n = std::get<std::uint32_t>(value);
+               nlohmann::json valueJson = {{"value", n}};
                res->end(valueJson.dump());
              } catch (const std::out_of_range &e) {
                LOG_F(INFO, "Slave with id %d not found.", id);

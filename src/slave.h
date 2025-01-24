@@ -24,7 +24,7 @@ public:
 
   virtual bool set_state(uint16_t target_state) = 0;
 
-  virtual int upload(uint16_t index, uint8_t subindex) = 0;
+  virtual ValueType upload(uint16_t index, uint8_t subindex) = 0;
 
   virtual void loadParameters() = 0;
 

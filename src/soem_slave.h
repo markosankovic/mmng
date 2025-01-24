@@ -92,11 +92,26 @@ public:
         if (success) {
           auto &parameter = iterator->second;
           parameter.name = od_list.Name[i];
+
           parameter.index = od_list.Index[i];
           parameter.subindex = j;
+
+          parameter.dataType = oe_list.DataType[j];
+
           parameter.bitLength = oe_list.BitLength[j];
+          auto byteLength = 1;
+          if (parameter.bitLength > 8) {
+            byteLength = parameter.bitLength % 8 == 0
+                             ? parameter.bitLength / 8
+                             : parameter.bitLength / 8 + 1;
+          }
+          parameter.byteLength = byteLength;
+
           parameter.objectCode = od_list.ObjectCode[i];
+
           parameter.objAccess = oe_list.ObjAccess[j];
+
+          parameter.data = std::make_shared<std::uint8_t[]>(byteLength);
         } else {
           LOG_F(ERROR,
                 "Device %d: Failed to add %#04x:%02x to the list of object "
@@ -122,5 +137,31 @@ public:
     return parameters;
   }
 
-  int upload(uint16_t index, uint8_t subindex) override { return 123; }
+  ValueType upload(uint16_t index, uint8_t subindex) override {
+    std::lock_guard<std::mutex> lock(mailboxMutex);
+
+    auto state = get_state();
+    if (state == EC_STATE_INIT || state == EC_STATE_BOOT) {
+      throw std::runtime_error(
+          "To upload object dictionary entries, the device must be in the (2) "
+          "PRE-OPERATIONAL, (4) SAFE-OPERATIONAL, or (8) OPERATIONAL state. "
+          "The current state is " +
+          ethercat_slave_state_to_string(state) + ".");
+    }
+
+    auto iterator = parametersMap.find(std::pair{index, subindex});
+    if (iterator == parametersMap.end()) {
+      throw std::out_of_range(
+          "Object dictionary entry not found! Index: " + std::to_string(index) +
+          ", Subindex: " + std::to_string(subindex));
+    }
+
+    auto &parameter = iterator->second;
+
+    ecx_SDOread(&ecx_context, position, parameter.index, parameter.subindex,
+                false, &parameter.byteLength, parameter.data.get(),
+                EC_TIMEOUTRXM * 3);
+
+    return parameter.getValue();
+  }
 };
