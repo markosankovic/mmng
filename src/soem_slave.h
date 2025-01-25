@@ -7,27 +7,30 @@
 
 class SoemSlave : public Slave {
 
+  std::unique_ptr<ecx_contextt> &context;
+
   uint8_t position;
 
   std::mutex mailboxMutex;
 
 public:
-  SoemSlave(const uint8_t position) : position(position) {}
+  SoemSlave(std::unique_ptr<ecx_contextt> &context, const uint8_t position)
+      : context(context), position(position) {}
 
   uint16_t get_state() override {
-    return get_ethercat_slave_state(&ecx_context, position, true);
+    return get_ethercat_slave_state(context.get(), position, true);
   }
 
   SlaveInfo get_info() override {
     SlaveInfo info;
     info.position = position;
-    info.name = ec_slave[position].name;
+    info.name = context->slavelist[position].name;
     info.state = get_state();
     return info;
   }
 
   bool set_state(uint16_t target_state) override {
-    return set_ethercat_slave_state(&ecx_context, position, target_state);
+    return set_ethercat_slave_state(context.get(), position, target_state);
   }
 
   void loadParameters() override {
@@ -49,7 +52,7 @@ public:
     ec_ODlistt od_list;
 
     memset(&od_list, 0, sizeof(od_list));
-    int error = ecx_readODlist(&ecx_context, position, &od_list);
+    int error = ecx_readODlist(context.get(), position, &od_list);
 
     if (error <= 0) {
       throw std::runtime_error(
@@ -64,7 +67,7 @@ public:
     ec_OElistt oe_list;
 
     for (uint16_t i = 0; i < od_list.Entries; i++) {
-      error = ecx_readODdescription(&ecx_context, i, &od_list);
+      error = ecx_readODdescription(context.get(), i, &od_list);
 
       if (error <= 0) {
         LOG_F(WARNING,
@@ -74,7 +77,7 @@ public:
       }
 
       memset(&oe_list, 0, sizeof(oe_list));
-      int error = ecx_readOE(&ecx_context, i, &od_list, &oe_list);
+      int error = ecx_readOE(context.get(), i, &od_list, &oe_list);
 
       if (error <= 0) {
         LOG_F(ERROR,
@@ -158,7 +161,7 @@ public:
 
     auto &parameter = iterator->second;
 
-    ecx_SDOread(&ecx_context, position, parameter.index, parameter.subindex,
+    ecx_SDOread(context.get(), position, parameter.index, parameter.subindex,
                 false, &parameter.byteLength, parameter.data.get(),
                 EC_TIMEOUTRXM * 3);
 
