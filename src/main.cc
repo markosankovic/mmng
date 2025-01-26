@@ -20,6 +20,8 @@ int main() {
 
   LOG_F(INFO, "Server is running in a separate thread.");
 
+  // TODO: Implement periodic execution for all machines at regular intervals.
+
   serverThread.join();
 
   LOG_F(INFO, "Server has stopped!");
