@@ -15,9 +15,12 @@ struct SlaveInfo {
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SlaveInfo, position, name, state)
 
 class Slave {
-public:
-  std::map<std::pair<uint16_t, uint8_t>, Parameter> parametersMap;
+protected:
+  Slave() {}
 
+  std::map<std::pair<uint16_t, uint8_t>, Parameter> parametersMap_;
+
+public:
   virtual uint16_t get_state() = 0;
 
   virtual SlaveInfo get_info() = 0;
@@ -31,7 +34,4 @@ public:
   virtual void clearParameters() = 0;
 
   virtual std::vector<Parameter> getParameters() = 0;
-
-protected:
-  Slave() {}
 };
