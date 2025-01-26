@@ -14,7 +14,7 @@ public:
 
   virtual ~Master() {}
 
-  virtual void init(const char *ifname) = 0;
+  virtual void init(const std::string ifname) = 0;
 
   virtual void deinit() = 0;
 };

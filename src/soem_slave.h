@@ -7,18 +7,18 @@
 
 class SoemSlave : public Slave {
 
-  std::unique_ptr<ecx_contextt> &context_;
+  ecx_contextt *context_;
 
   uint8_t position_;
 
   std::mutex mailboxMutex_;
 
 public:
-  SoemSlave(std::unique_ptr<ecx_contextt> &context, const uint8_t position)
+  SoemSlave(ecx_contextt *context, const uint8_t position)
       : context_(context), position_(position) {}
 
   uint16_t get_state() override {
-    return get_ethercat_slave_state(context_.get(), position_, true);
+    return get_ethercat_slave_state(context_, position_, true);
   }
 
   SlaveInfo get_info() override {
@@ -30,7 +30,7 @@ public:
   }
 
   bool set_state(uint16_t target_state) override {
-    return set_ethercat_slave_state(context_.get(), position_, target_state);
+    return set_ethercat_slave_state(context_, position_, target_state);
   }
 
   void loadParameters() override {
@@ -52,7 +52,7 @@ public:
     ec_ODlistt od_list;
 
     memset(&od_list, 0, sizeof(od_list));
-    int error = ecx_readODlist(context_.get(), position_, &od_list);
+    int error = ecx_readODlist(context_, position_, &od_list);
 
     if (error <= 0) {
       throw std::runtime_error(
@@ -67,7 +67,7 @@ public:
     ec_OElistt oe_list;
 
     for (uint16_t i = 0; i < od_list.Entries; i++) {
-      error = ecx_readODdescription(context_.get(), i, &od_list);
+      error = ecx_readODdescription(context_, i, &od_list);
 
       if (error <= 0) {
         LOG_F(WARNING,
@@ -77,7 +77,7 @@ public:
       }
 
       memset(&oe_list, 0, sizeof(oe_list));
-      int error = ecx_readOE(context_.get(), i, &od_list, &oe_list);
+      int error = ecx_readOE(context_, i, &od_list, &oe_list);
 
       if (error <= 0) {
         LOG_F(ERROR,
@@ -140,7 +140,8 @@ public:
     return parameters;
   }
 
-  ValueType upload(uint16_t index, uint8_t subindex) override {
+  ValueType upload(uint16_t index, uint8_t subindex,
+                   bool refresh = true) override {
     std::lock_guard<std::mutex> lock(mailboxMutex_);
 
     auto state = get_state();
@@ -161,9 +162,11 @@ public:
 
     auto &parameter = iterator->second;
 
-    ecx_SDOread(context_.get(), position_, parameter.index, parameter.subindex,
-                false, &parameter.byteLength, parameter.data.get(),
-                EC_TIMEOUTRXM * 3);
+    if (refresh) {
+      ecx_SDOread(context_, position_, parameter.index, parameter.subindex,
+                  false, &parameter.byteLength, parameter.data.get(),
+                  EC_TIMEOUTRXM * 3);
+    }
 
     return parameter.getValue();
   }

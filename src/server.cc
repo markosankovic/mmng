@@ -20,7 +20,9 @@ template <typename T> T Server::getParameter(uWS::HttpRequest *req, int index) {
   std::string_view psv = req->getParameter(index);
   std::string str(psv.substr(0, psv.length()));
 
-  if constexpr (std::is_same<T, int>::value) {
+  if constexpr (std::is_same<T, std::string>::value) {
+    return str;
+  } else if constexpr (std::is_same<T, int>::value) {
     return std::stoi(str);
   } else if constexpr (std::is_same<T, float>::value) {
     return std::stof(str);
@@ -44,10 +46,15 @@ void Server::start() {
            })
       .get("/master/init/:ifname",
            [&](auto *res, auto *req) {
-             auto ifname = getParameter<const char *>(req, 0);
-             master.init(ifname);
+             auto ifname = getParameter<std::string>(req, 0);
              writeHeaders(res);
-             res->end();
+             try {
+               master.init(ifname);
+               res->end();
+             } catch (std::runtime_error &e) {
+               LOG_F(ERROR, "Error initializing master: %s", e.what());
+               res->writeStatus("400")->end();
+             }
            })
       .get("/master/deinit",
            [&](auto *res, auto *req) {
@@ -150,9 +157,23 @@ void Server::start() {
              auto id = getParameter<int>(req, 0);
              auto index = getParameter<int>(req, 1);
              auto subindex = getParameter<int>(req, 2);
+
+             LOG_F(
+                 INFO,
+                 "Received upload request with id: %d, index: %d, subindex: %d",
+                 id, index, subindex);
+
              writeHeaders(res);
+
              try {
+               auto start_time = std::chrono::high_resolution_clock::now();
                auto variant = master.slaves_.at(id)->upload(index, subindex);
+               auto end_time = std::chrono::high_resolution_clock::now();
+               std::chrono::duration<double, std::milli> elapsed =
+                   end_time - start_time;
+               LOG_F(INFO,
+                     "Time taken to upload value from slave: %.6f milliseconds",
+                     elapsed.count());
                auto value = std::get<std::uint32_t>(variant);
                nlohmann::json valueJson = value;
                res->end(valueJson.dump());
